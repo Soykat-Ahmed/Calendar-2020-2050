@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animated Colorful Calendar 2020-2050</title>
+
+    <!-- Internal CSS -->
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(to right, #ffecd2, #fcb69f);
+            overflow: hidden;
+        }
+        .calendar-container {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            width: 350px;
+            text-align: center;
+            animation: pop-in 0.6s ease-out forwards;
+            opacity: 0;
+            transform: scale(0.9);
+        }
+        .calendar-header {
+            margin-bottom: 15px;
+            animation: slide-down 0.8s ease-out forwards;
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        select {
+            padding: 8px;
+            font-size: 1rem;
+            margin: 5px;
+            border: 2px solid #ff8c94;
+            border-radius: 8px;
+            background-color: #ffd5d5;
+            color: #333;
+            font-weight: bold;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        select:hover {
+            background-color: #ff8c94;
+            color: #fff;
+        }
+        .calendar {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th {
+            color: #ffffff;
+            background-color: #ff8c94;
+            padding: 10px 0;
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+        td {
+            width: 50px;
+            height: 50px;
+            text-align: center;
+            font-size: 1rem;
+            border-radius: 50%;
+            cursor: pointer;
+            color: #333;
+            opacity: 0;
+            transform: scale(0.5);
+            animation: fade-in 0.6s ease forwards;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        td:hover {
+            background-color: #ffb6b9;
+            color: #fff;
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        td.active {
+            background-color: #ff8c94;
+            color: #ffffff;
+        }
+
+        /* Keyframe animations */
+        @keyframes fade-in {
+            0% { opacity: 0; transform: scale(0.5); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        @keyframes pop-in {
+            0% { opacity: 0; transform: scale(0.9); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        @keyframes slide-down {
+            0% { opacity: 0; transform: translateY(-20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="calendar-container">
+        <div class="calendar-header">
+            <select id="yearSelector"></select>
+            <select id="monthSelector">
+                <option value="0">January</option>
+                <option value="1">February</option>
+                <option value="2">March</option>
+                <option value="3">April</option>
+                <option value="4">May</option>
+                <option value="5">June</option>
+                <option value="6">July</option>
+                <option value="7">August</option>
+                <option value="8">September</option>
+                <option value="9">October</option>
+                <option value="10">November</option>
+                <option value="11">December</option>
+            </select>
+        </div>
+        <table class="calendar">
+            <thead>
+                <tr>
+                    <th>Sun</th>
+                    <th>Mon</th>
+                    <th>Tue</th>
+                    <th>Wed</th>
+                    <th>Thu</th>
+                    <th>Fri</th>
+                    <th>Sat</th>
+                </tr>
+            </thead>
+            <tbody id="calendarBody">
+                <!-- Calendar days will be generated here by JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Internal JavaScript -->
+    <script>
+        const yearSelector = document.getElementById('yearSelector');
+        const monthSelector = document.getElementById('monthSelector');
+        const calendarBody = document.getElementById('calendarBody');
+
+        // Populate year options from 2020 to 2050
+        for (let i = 2020; i <= 2050; i++) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = i;
+            yearSelector.appendChild(option);
+        }
+
+        // Set current month and year as default
+        const today = new Date();
+        yearSelector.value = today.getFullYear();
+        monthSelector.value = today.getMonth();
+
+        // Generate calendar when year or month changes
+        yearSelector.addEventListener('change', generateCalendar);
+        monthSelector.addEventListener('change', generateCalendar);
+
+        function generateCalendar() {
+            const year = parseInt(yearSelector.value);
+            const month = parseInt(monthSelector.value);
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            // Clear previous calendar
+            calendarBody.innerHTML = '';
+
+            // Fill in blank days for the first week
+            let row = document.createElement('tr');
+            for (let i = 0; i < firstDay; i++) {
+                const cell = document.createElement('td');
+                row.appendChild(cell);
+            }
+
+            // Fill in days of the month
+            for (let day = 1; day <= daysInMonth; day++) {
+                if (row.children.length === 7) {
+                    calendarBody.appendChild(row);
+                    row = document.createElement('tr');
+                }
+                const cell = document.createElement('td');
+                cell.textContent = day;
+                cell.classList.add('day-cell');
+                
+                // Highlight the current day
+                if (year === today.getFullYear() && month === today.getMonth() && day === today.getDate()) {
+                    cell.classList.add('active');
+                }
+
+                row.appendChild(cell);
+            }
+
+            // Append last row if it contains days
+            if (row.children.length > 0) {
+                calendarBody.appendChild(row);
+            }
+        }
+
+        // Generate initial calendar
+        generateCalendar();
+    </script>
+</body>
+</html>
